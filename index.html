@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Resume Studio</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+		:root {
+			--ink: #18212b;
+			--muted: #68727d;
+			--paper: #fffdf8;
+			--canvas: #eef1f3;
+			--line: #dce2e5;
+			--accent: #e26942;
+			--accent-dark: #b94d2b;
+			--teal: #237c78;
+			--sidebar: #17313a;
+			--shadow: 0 18px 45px rgba(27, 44, 51, .12);
+		}
+
+		* { box-sizing: border-box; }
+		html { scroll-behavior: smooth; }
+		body { margin: 0; color: var(--ink); background: var(--canvas); font-family: 'DM Sans', sans-serif; }
+		button, input, textarea { font: inherit; }
+		button { cursor: pointer; }
+		.app-shell { min-height: 100vh; display: grid; grid-template-columns: minmax(300px, 410px) 1fr; }
+
+		.editor { background: var(--sidebar); color: white; padding: 34px clamp(22px, 4vw, 52px); overflow-y: auto; }
+		.brand { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 44px; }
+		.brand-mark { width: 38px; height: 38px; display: grid; place-items: center; background: var(--accent); color: white; font-family: Georgia, serif; font-size: 22px; font-weight: 700; border-radius: 4px; }
+		.brand h1 { margin: 0; font-size: 18px; letter-spacing: -.03em; }
+		.brand p { margin: 3px 0 0; color: #a9bdc0; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+		.status { color: #8cbeb8; font: 10px 'DM Mono', monospace; }
+		.editor-intro { margin-bottom: 30px; }
+		.eyebrow { color: #f6ad91; font: 10px 'DM Mono', monospace; letter-spacing: .16em; text-transform: uppercase; }
+		.editor h2 { margin: 8px 0 8px; font-size: 27px; letter-spacing: -.04em; }
+		.editor-intro p { max-width: 300px; margin: 0; color: #acc0c1; font-size: 13px; line-height: 1.6; }
+		.form-section { border-top: 1px solid rgba(255,255,255,.13); padding: 24px 0; }
+		.form-section h3 { display: flex; align-items: center; gap: 9px; margin: 0 0 17px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+		.number { display: grid; place-items: center; width: 20px; height: 20px; color: var(--sidebar); background: #f6ad91; border-radius: 50%; font: 10px 'DM Mono', monospace; }
+		.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+		.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+		.field.full { grid-column: 1 / -1; }
+		.field label { color: #9bb2b5; font-size: 11px; }
+		.field input, .field textarea { width: 100%; border: 1px solid #36545b; border-radius: 3px; outline: 0; background: #214049; color: white; padding: 10px 11px; transition: border .2s, background .2s; }
+		.field input:focus, .field textarea:focus { border-color: #f6ad91; background: #284b54; }
+		.field textarea { min-height: 92px; resize: vertical; line-height: 1.5; }
+		.field input::placeholder, .field textarea::placeholder { color: #789296; }
+		.add-button { border: 1px dashed #53747a; border-radius: 3px; width: 100%; background: transparent; color: #d3e0df; padding: 10px; font-size: 12px; }
+		.add-button:hover { border-color: #f6ad91; color: white; }
+		.entry { position: relative; padding: 14px 14px 2px; margin-bottom: 12px; border: 1px solid #36545b; border-radius: 3px; }
+		.remove-entry { position: absolute; top: 9px; right: 8px; border: 0; background: transparent; color: #91aaad; font-size: 18px; line-height: 1; }
+		.remove-entry:hover { color: #f6ad91; }
+		.editor-footer { display: flex; gap: 10px; padding-top: 20px; }
+		.editor-footer button { flex: 1; border: 0; border-radius: 3px; padding: 12px 9px; font-size: 12px; font-weight: 700; }
+		.primary { color: #402015; background: #f6ad91; }
+		.secondary { border: 1px solid #547176 !important; color: white; background: transparent; }
+		.primary:hover { background: #ffbea4; }
+		.secondary:hover { background: #244a53; }
+
+		.preview-area { padding: clamp(22px, 5vw, 72px); overflow-x: auto; background: #eef1f3; }
+		.preview-toolbar { max-width: 850px; margin: 0 auto 18px; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font: 11px 'DM Mono', monospace; }
+		.print-button { border: 1px solid #c9d1d4; border-radius: 3px; padding: 9px 14px; color: var(--ink); background: white; font: 600 11px 'DM Sans', sans-serif; }
+		.print-button:hover { border-color: var(--accent); color: var(--accent-dark); }
+		.resume { width: min(100%, 850px); min-height: 1100px; margin: 0 auto; padding: clamp(30px, 5vw, 64px) clamp(28px, 6vw, 72px); background: var(--paper); box-shadow: var(--shadow); }
+		.resume-header { padding-bottom: 29px; border-bottom: 2px solid var(--ink); }
+		.resume-header h1 { max-width: 640px; margin: 7px 0 5px; font: 700 clamp(38px, 6vw, 67px)/.98 'Playfair Display', serif; letter-spacing: -.05em; }
+		.resume-header h2 { margin: 0 0 19px; color: var(--accent-dark); font-size: 14px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+		.contact-line { display: flex; flex-wrap: wrap; gap: 7px 18px; color: var(--muted); font-size: 11px; }
+		.contact-item { display: inline-flex; align-items: center; gap: 5px; }
+		.contact-item::before { content: '•'; color: var(--accent); font-size: 15px; }
+		.resume-body { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(170px, .8fr); gap: clamp(28px, 6vw, 62px); padding-top: 29px; }
+		.resume-section { margin-bottom: 31px; }
+		.resume-section h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 17px; color: var(--teal); font: 500 11px 'DM Mono', monospace; letter-spacing: .11em; text-transform: uppercase; }
+		.resume-section h3::after { content: ''; height: 1px; flex: 1; background: #cad8d7; }
+		.summary { margin: 0; color: #414a50; font-size: 13px; line-height: 1.7; }
+		.resume-entry { position: relative; margin-bottom: 23px; }
+		.resume-entry:last-child { margin-bottom: 0; }
+		.resume-entry h4 { margin: 0 0 3px; font-size: 15px; letter-spacing: -.02em; }
+		.resume-entry .org { margin: 0 0 7px; color: var(--accent-dark); font-size: 12px; font-weight: 700; }
+		.resume-entry .date { float: right; color: var(--muted); font: 10px 'DM Mono', monospace; }
+		.resume-entry p { margin: 0; color: #586169; font-size: 12px; line-height: 1.6; white-space: pre-line; }
+		.skills { display: flex; flex-wrap: wrap; gap: 7px; }
+		.skill { padding: 6px 9px; border: 1px solid #c9d9d7; border-radius: 2px; color: var(--teal); font-size: 11px; }
+		.side-list { display: grid; gap: 12px; }
+		.side-item strong { display: block; margin-bottom: 3px; font-size: 12px; }
+		.side-item span { display: block; color: var(--muted); font-size: 11px; line-height: 1.45; }
+		.empty { color: #9ba4a9; font-style: italic; font-size: 12px; }
+		@media (max-width: 800px) {
+			.app-shell { display: block; }
+			.editor { padding: 25px 20px 30px; }
+			.brand { margin-bottom: 28px; }
+			.preview-area { padding: 26px 14px 40px; }
+			.preview-toolbar { padding: 0 2px; }
+			.resume { min-height: auto; }
+		}
+		@media (max-width: 540px) {
+			.field-grid, .resume-body { grid-template-columns: 1fr; }
+			.field.full { grid-column: auto; }
+			.resume-header h1 { font-size: 45px; }
+		}
+		@media print {
+			body { background: white; }
+			.editor, .preview-toolbar { display: none; }
+			.preview-area { padding: 0; background: white; }
+			.resume { width: 100%; box-shadow: none; }
+		}
+	</style>
+</head>
+<body>
+	<main class="app-shell">
+		<aside class="editor">
+			<div class="brand">
+				<div style="display:flex;align-items:center;gap:10px"><div class="brand-mark">R</div><div><h1>Resume Studio</h1><p>Build your next chapter</p></div></div>
+				<span class="status" id="saveStatus">AUTO-SAVED</span>
+			</div>
+			<div class="editor-intro"><span class="eyebrow">Your workspace</span><h2>Shape your story.</h2><p>Fill in the details and watch your resume take form on the right.</p></div>
+
+			<form id="resumeForm">
+				<section class="form-section"><h3><span class="number">01</span> Personal details</h3><div class="field-grid">
+					<div class="field full"><label for="name">Full name</label><input id="name" data-key="name" placeholder="Alex Morgan" /></div>
+					<div class="field full"><label for="role">Professional title</label><input id="role" data-key="role" placeholder="Product designer" /></div>
+					<div class="field"><label for="email">Email</label><input id="email" data-key="email" placeholder="alex@email.com" /></div>
+					<div class="field"><label for="phone">Phone</label><input id="phone" data-key="phone" placeholder="+1 555 123 4567" /></div>
+					<div class="field"><label for="location">Location</label><input id="location" data-key="location" placeholder="New York, NY" /></div>
+					<div class="field"><label for="website">Website</label><input id="website" data-key="website" placeholder="alexmorgan.com" /></div>
+					<div class="field full"><label for="summary">Profile summary</label><textarea id="summary" data-key="summary" placeholder="A brief, confident introduction that brings your experience into focus..."></textarea></div>
+				</div></section>
+
+				<section class="form-section"><h3><span class="number">02</span> Experience</h3><div id="experienceFields"></div><button type="button" class="add-button" id="addExperience">+ Add experience</button></section>
+				<section class="form-section"><h3><span class="number">03</span> Education</h3><div id="educationFields"></div><button type="button" class="add-button" id="addEducation">+ Add education</button></section>
+				<section class="form-section"><h3><span class="number">04</span> Skills & links</h3><div class="field"><label for="skills">Skills, separated by commas</label><input id="skills" data-key="skills" placeholder="Figma, Strategy, Research, Prototyping" /></div><div class="field"><label for="linkedin">LinkedIn URL</label><input id="linkedin" data-key="linkedin" placeholder="linkedin.com/in/alexmorgan" /></div></section>
+				<div class="editor-footer"><button type="button" class="secondary" id="clearButton">Clear all</button><button type="button" class="primary" id="printButton">Print / PDF ↗</button></div>
+			</form>
+		</aside>
+
+		<section class="preview-area"><div class="preview-toolbar"><span>LIVE PREVIEW / A4 FORMAT</span><button class="print-button" id="topPrint">↗ Export resume</button></div>
+			<article class="resume" id="resumePreview">
+				<header class="resume-header"><span class="eyebrow" style="color:var(--teal)">Curriculum vitae</span><h1 >Ronaldo Bolsonaro da Silva</h1><h2 >Ditador da china antiga</h2><div class="contact-line" id="contactLine"></div></header>
+				<div class="resume-body"><div>
+					<section class="resume-section"><h3>sou um antigo ditador norte coreano que morreu de morte morrida </h3><p class="summary" id="previewSummary">Your profile summary will appear here. Tell the reader what you do best, what motivates you, and the kind of value you bring.</p></section>
+					<section class="resume-section"><h3>Experience</h3><div id="previewExperience"><p class="empty">Add your professional experience to get started.</p></div></section>
+				</div><aside>
+					<section class="resume-section"><h3>Skills</h3><div class="skills" id="previewSkills"><span class="empty">Your skills</span></div></section>
+					<section class="resume-section"><h3>Education</h3><div class="side-list" id="previewEducation"><p class="empty">Add your education.</p></div></section>
+					<section class="resume-section"><h3>Connect</h3><div class="side-list" id="previewLinks"><p class="empty">Your links</p></div></section>
+				</aside></div>
+			</article>
+		</section>
+	</main>
+	<script>
+		const storageKey = 'resume-studio-data';
+		const defaultData = { name: '', role: '', email: '', phone: '', location: '', website: '', summary: '', skills: '', linkedin: '', experience: [{ title: '', company: '', dates: '', details: '' }], education: [{ degree: '', school: '', dates: '' }] };
+		let data = JSON.parse(localStorage.getItem(storageKey) || 'null') || structuredClone(defaultData);
+		const $ = (selector) => document.querySelector(selector);
+		const esc = (value) => String(value || '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[char]));
+
+		function save() { localStorage.setItem(storageKey, JSON.stringify(data)); $('#saveStatus').textContent = 'SAVED JUST NOW'; setTimeout(() => $('#saveStatus').textContent = 'AUTO-SAVED', 1800); }
+		function syncBasic() { document.querySelectorAll('[data-key]').forEach((field) => field.value = data[field.dataset.key] || ''); }
+		function renderFields() {
+			$('#experienceFields').innerHTML = data.experience.map((item, index) => `<div class="entry"><button type="button" class="remove-entry" data-type="experience" data-index="${index}" aria-label="Remove experience">×</button><div class="field-grid"><div class="field"><label>Job title</label><input data-type="experience" data-index="${index}" data-field="title" value="${esc(item.title)}" placeholder="Senior designer" /></div><div class="field"><label>Company</label><input data-type="experience" data-index="${index}" data-field="company" value="${esc(item.company)}" placeholder="Company name" /></div><div class="field"><label>Dates</label><input data-type="experience" data-index="${index}" data-field="dates" value="${esc(item.dates)}" placeholder="2022 — Present" /></div><div class="field full"><label>What did you accomplish?</label><textarea data-type="experience" data-index="${index}" data-field="details" placeholder="Describe your impact and responsibilities..."></textarea></div></div></div>`).join('');
+			$('#experienceFields').querySelectorAll('textarea').forEach((field) => field.value = data.experience[field.dataset.index].details || '');
+			$('#educationFields').innerHTML = data.education.map((item, index) => `<div class="entry"><button type="button" class="remove-entry" data-type="education" data-index="${index}" aria-label="Remove education">×</button><div class="field-grid"><div class="field"><label>Degree / certificate</label><input data-type="education" data-index="${index}" data-field="degree" value="${esc(item.degree)}" placeholder="B.A. Design" /></div><div class="field"><label>School</label><input data-type="education" data-index="${index}" data-field="school" value="${esc(item.school)}" placeholder="University name" /></div><div class="field full"><label>Dates</label><input data-type="education" data-index="${index}" data-field="dates" value="${esc(item.dates)}" placeholder="2016 — 2020" /></div></div></div>`).join('');
+		}
+		function renderPreview() {
+			$('#previewName').textContent = data.name || 'Your Name'; $('#previewRole').textContent = data.role || 'Your professional title'; $('#previewSummary').textContent = data.summary || 'Your profile summary will appear here. Tell the reader what you do best, what motivates you, and the kind of value you bring.';
+			const contacts = [data.email, data.phone, data.location, data.website].filter(Boolean); $('#contactLine').innerHTML = contacts.length ? contacts.map(esc).map((item) => `<span class="contact-item">${item}</span>`).join('') : '<span class="empty">Your contact details</span>';
+			const filledExperience = data.experience.filter((item) => item.title || item.company || item.details); $('#previewExperience').innerHTML = filledExperience.length ? filledExperience.map((item) => `<div class="resume-entry"><span class="date">${esc(item.dates)}</span><h4>${esc(item.title || 'Role')}</h4><p class="org">${esc(item.company || 'Company')}</p><p>${esc(item.details || 'Add a description of your work and impact.')}</p></div>`).join('') : '<p class="empty">Add your professional experience to get started.</p>';
+			const skills = data.skills.split(',').map((skill) => skill.trim()).filter(Boolean); $('#previewSkills').innerHTML = skills.length ? skills.map((skill) => `<span class="skill">${esc(skill)}</span>`).join('') : '<span class="empty">Your skills</span>';
+			const filledEducation = data.education.filter((item) => item.degree || item.school); $('#previewEducation').innerHTML = filledEducation.length ? filledEducation.map((item) => `<div class="side-item"><strong>${esc(item.degree || 'Degree')}</strong><span>${esc(item.school || 'School')} ${item.dates ? `· ${esc(item.dates)}` : ''}</span></div>`).join('') : '<p class="empty">Add your education.</p>';
+			const links = [data.linkedin, data.website].filter(Boolean); $('#previewLinks').innerHTML = links.length ? links.map((link) => `<div class="side-item"><span>${esc(link)}</span></div>`).join('') : '<p class="empty">Your links</p>';
+		}
+		function update() { syncBasic(); renderFields(); renderPreview(); }
+		document.addEventListener('input', (event) => { const field = event.target; if (field.dataset.key) data[field.dataset.key] = field.value; if (field.dataset.type) data[field.dataset.type][field.dataset.index][field.dataset.field] = field.value; renderPreview(); save(); });
+		document.addEventListener('click', (event) => { const button = event.target.closest('.remove-entry'); if (!button) return; data[button.dataset.type].splice(Number(button.dataset.index), 1); if (!data[button.dataset.type].length) data[button.dataset.type].push({ ...(button.dataset.type === 'experience' ? { title: '', company: '', dates: '', details: '' } : { degree: '', school: '', dates: '' }) }); update(); save(); });
+		$('#addExperience').addEventListener('click', () => { data.experience.push({ title: '', company: '', dates: '', details: '' }); update(); });
+		$('#addEducation').addEventListener('click', () => { data.education.push({ degree: '', school: '', dates: '' }); update(); });
+		$('#clearButton').addEventListener('click', () => { if (confirm('Clear all resume information?')) { data = structuredClone(defaultData); update(); save(); } });
+		$('#printButton').addEventListener('click', () => window.print()); $('#topPrint').addEventListener('click', () => window.print());
+		update();
+	</script>
+</body>
+</html>
